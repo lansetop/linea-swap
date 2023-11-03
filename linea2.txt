@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8;
+
+interface ILineaExchange {
+
+  function swap(address fromToken, address toToken, uint amount) external returns (uint);
+
+}
+
+contract LineaSwap {
+
+  ILineaExchange constant exchange = ILineaExchange(0x...); // Linea交换合约地址
+
+  function swapTokens(address fromToken, address toToken, uint amount) external {
+    require(amount > 0, "Invalid amount");
+    uint receivedAmount = exchange.swap(fromToken, toToken, amount);
+    require(receivedAmount > 0, "Swap failed");
+  }
+
+}
