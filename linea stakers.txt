@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract LineaStaking {
+    // 存储用户质押信息
+    struct Staker {
+        uint256 amount; // 质押金额
+        uint256 depositTime; // 质押时间
+    }
+
+    mapping(address => Staker) public stakers;
+    uint256 public constant ANNUAL_INTEREST_RATE = 20; // 年化利率20%
+    uint256 public constant SECONDS_IN_YEAR = 365 * 24 * 60 * 60;
+
+    // 用户质押函数
+    function stake(uint256 _amount) public {
+        require(_amount > 0, "Amount must be greater than 0");
+        // 转移代币到合约地址
+        // 这里假设代币已经被批准给合约
+        // 例如：token.transferFrom(msg.sender, address(this), _amount);
+
+        // 更新质押信息
+        stakers[msg.sender].amount += _amount;
+        stakers[msg.sender].depositTime = block.timestamp;
+    }
+
+    // 计算利息
+    function calculateInterest(address _staker) public view returns (uint256) {
+        Staker memory staker = stakers[_staker];
+        if (staker.amount == 0) {
+            return 0;
+        }
+
+        uint256 stakingDuration = block.timestamp - staker.depositTime;
+        uint256 interest = staker.amount * ANNUAL_INTEREST_RATE * stakingDuration / SECONDS_IN_YEAR / 100;
+        return interest;
+    }
+
+    // 用户提取（本金+利息）
+    function withdraw() public {
+        uint256 principal = stakers[msg.sender].amount;
+        require(principal > 0, "No funds staked");
+
+        uint256 interest = calculateInterest(msg.sender);
+        uint256 totalAmount = principal + interest;
+
+        // 重置用户质押信息
+        stakers[msg.sender].amount = 0;
+        stakers[msg.sender].depositTime = 0;
+
+        // 转移代币给用户
+        // 例如：token.transfer(msg.sender, totalAmount);
+    }
+
+    // 其他必要的合约函数...
+}
